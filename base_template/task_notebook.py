@@ -42,6 +42,26 @@ emp_role = spark.read\
 # COMMAND ----------
 
 # MAGIC %md
+# MAGIC ## reading delta files
+
+# COMMAND ----------
+
+emp_salary_designation_delta_df = spark.read\
+    .format("csv")\
+    .option("header", "true")\
+    .load(f"wasbs://{container_name}@{storage_account_name}.blob.core.windows.net/emp_salary_designation_delta.csv")
+
+# COMMAND ----------
+
+emp_details_df = spark.read\
+    .format("csv")\
+    .option("Sep","~")\
+    .option("header", "true")\
+    .load(f"wasbs://{container_name}@{storage_account_name}.blob.core.windows.net/emp_details_delta.csv")
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC #Read from Azure SQL Server
 
 # COMMAND ----------
