@@ -9,7 +9,7 @@
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC #Read a file from AzureDateLakeStorage
+# MAGIC #Read a file from AzureDateLakeStorage and Write into Catalog
 
 # COMMAND ----------
 
@@ -22,8 +22,12 @@ spark.conf.set(f"fs.azure.account.key.{storage_account_name}.blob.core.windows.n
 emp_details_df = spark.read\
     .format("csv")\
     .option("Sep","~")\
-    .option("header", "true")\
+    .option("header", True)\
     .load(f"wasbs://{container_name}@{storage_account_name}.blob.core.windows.net/emp_details.csv")
+
+# COMMAND ----------
+
+emp_details_df.write.format("delta").saveAsTable("spark_catalog.default.emp_details")
 
 # COMMAND ----------
 
@@ -34,6 +38,10 @@ emp_salary_designation_df = spark.read\
 
 # COMMAND ----------
 
+emp_salary_designation_df.write.format("delta").saveAsTable("spark_catalog.default.emp_designation")
+
+# COMMAND ----------
+
 emp_role = spark.read\
     .format("csv")\
     .option("header", "true")\
@@ -41,8 +49,12 @@ emp_role = spark.read\
 
 # COMMAND ----------
 
+emp_role.write.format("delta").saveAsTable("spark_catalog.default.emp_role")
+
+# COMMAND ----------
+
 # MAGIC %md
-# MAGIC ## reading delta files
+# MAGIC ## reading delta files into dataframe
 
 # COMMAND ----------
 
@@ -82,8 +94,22 @@ read_from_sql_df= spark.read.format("jdbc")\
 
 # COMMAND ----------
 
+# MAGIC %sql
+# MAGIC show tables
+
+# COMMAND ----------
+
 # MAGIC %md
-# MAGIC #SCD 2 type implementation
+# MAGIC # SCD-1 implementation
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC #SCD 2
 
 # COMMAND ----------
 
