@@ -9,6 +9,15 @@
 # COMMAND ----------
 
 # MAGIC %md
+# MAGIC #Importing libraries 
+
+# COMMAND ----------
+
+from delta import DeltaTable
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC #Read a file from AzureDateLakeStorage and Write into Catalog
 
 # COMMAND ----------
@@ -94,15 +103,18 @@ read_from_sql_df= spark.read.format("jdbc")\
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC show tables
-
-# COMMAND ----------
-
 # MAGIC %md
 # MAGIC # SCD-1 implementation
 
 # COMMAND ----------
+
+# MAGIC %sql
+# MAGIC select * from spark_catalog.default.emp_details
+
+# COMMAND ----------
+
+dt = DeltaTable.forName(spark, "spark_catalog.default.emp_details")
+
 
 
 
