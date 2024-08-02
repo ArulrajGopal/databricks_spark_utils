@@ -1,14 +1,31 @@
 # Databricks notebook source
-storage_account_name = "storageaccountewrere2sdf"
+#SecretKeys
 storage_account_access_key = ""
-container_name = "raw"
+database_password = ""
 
+# COMMAND ----------
+
+storage_account_name = "test8139"
+container_name = "raw"
 spark.conf.set(f"fs.azure.account.key.{storage_account_name}.blob.core.windows.net", storage_account_access_key)
 
 # COMMAND ----------
 
-df = spark.read\
+emp_details_df = spark.read\
     .format("csv")\
     .option("header", "true")\
-    .load(f"wasbs://{container_name}@{storage_account_name}.blob.core.windows.net/emp_salary.csv")
-df.display()
+    .load(f"wasbs://{container_name}@{storage_account_name}.blob.core.windows.net/emp_details.csv")
+
+# COMMAND ----------
+
+emp_salary_designation_df = spark.read\
+    .format("csv")\
+    .option("header", "true")\
+    .load(f"wasbs://{container_name}@{storage_account_name}.blob.core.windows.net/emp_salary_designation.csv")
+
+# COMMAND ----------
+
+emp_role = spark.read\
+    .format("csv")\
+    .option("header", "true")\
+    .load(f"wasbs://{container_name}@{storage_account_name}.blob.core.windows.net/emp_role.csv")
