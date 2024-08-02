@@ -14,7 +14,7 @@
 # COMMAND ----------
 
 from delta import DeltaTable
-from pyspark.sql.functions import col,to_date, rank, when
+from pyspark.sql.functions import col,to_date, rank, when, lit, current_date
 from pyspark.sql.window import Window
 
 # COMMAND ----------
@@ -187,14 +187,38 @@ emp_salary_designation_delta_df = spark.read\
 
 # COMMAND ----------
 
-emp_salary_designation_delta_df.display()
+#data type conversion
+date_converted_df = emp_salary_designation_delta_df.withColumn('updated_date', to_date(col('updated_date'), 'dd-MMM-yy').alias('updated_date').cast('date'))
+
+data_type_map = {
+  'rec_id': 'int', 
+  'emp_id': 'int', 
+  'salary': 'int'
+  }
+
+cast_col_list = []
+
+for column_schema in date_converted_df.dtypes:
+    cast_col_list.append(col(column_schema[0]).cast(data_type_map.get(column_schema[0], column_schema[1])))
+
+data_type_convereted_df = date_converted_df.select(*cast_col_list)
 
 # COMMAND ----------
 
-dt = DeltaTable.forName(spark, "spark_catalog.default.emp_designation")
+target_df = spark.read.table("spark_catalog.default.emp_designation")
 
-dt.alias("tgt").merge()
+new_key_added_df = data_type_convereted_df.withColumn("new_key",col("emp_id"))
 
+joined_df = target_df.alias("LH").join(new_key_added_df.alias("RH"), col("LH.emp_id")==col("RH.emp_id"),"inner")\
+                    .select("RH.*")\
+                    .withColumn("new_key",lit(None))
+
+delta_df = new_key_added_df.union(joined_df)\
+                    .withColumn("is_active", lit("Y"))
+
+# COMMAND ----------
+
+delta_df.display()
 
 # COMMAND ----------
 
@@ -203,7 +227,31 @@ dt.alias("tgt").merge()
 
 # COMMAND ----------
 
+dt = DeltaTable.forName(spark, "spark_catalog.default.emp_designation")
 
+dt.alias("tgt").merge(delta_df.alias("src"), "tgt.emp_id=src.new_key")\
+                .whenNotMatchedInsertAll()\
+                .whenMatchedUpdate(set = {
+                    "updated_date": lit(current_date()),
+                    "is_active":lit("N")
+                })\
+                .execute()
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC select * from spark_catalog.default.emp_designation
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC select * from spark_catalog.default.emp_designation
+# MAGIC where is_active = "Y"
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC #Percentage hike from previous salary
 
 # COMMAND ----------
 
@@ -218,12 +266,6 @@ dt.alias("tgt").merge()
 
 
 # COMMAND ----------
-
-
-
-# COMMAND ----------
-
-
 
 # Syntax for broad cast join?
 # Join_cond = (
@@ -232,22 +274,4 @@ dt.alias("tgt").merge()
 # )
 # New_df = df.alias(“LH”).join(broadcast(df1).alias(“RH”), Join_cond
 # , “left”)
-# ---------------------------------------------------------------------------------
-# Syntax for row number in pyspark?
-# Wspec = Window.partitionBy(“col1”,”col2”,”Col3”)\	
-# .orderBy(desc(“col3”), (“col4”)
-# New_df = df.withColumn(“RN”, row_number ().over(Wspec))
-# ---------------------------------------------------------------------------------
-
-
-
-# Syntax upsert?
-# abc_delta_tab = DeltaTable.forName(spark, table_name)
-# abc_delta_tab.alias(“LH”).merge(1)\
-# .whenMatchedInser(2)\
-# .whenMatchedUpdate(3)\
-# .execute(4)
-# 1 >> source_df.alias(“RH”), join_cond
-# 2 >>  cond
-# 3 >> cond, set = dict
 
