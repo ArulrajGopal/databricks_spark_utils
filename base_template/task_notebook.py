@@ -142,25 +142,8 @@ dt.alias("tgt")\
 # MAGIC %md
 # MAGIC #Percentage hike from previous salary
 
-# COMMAND ----------
 
 
 
-# COMMAND ----------
 
-
-
-# COMMAND ----------
-
-
-
-# COMMAND ----------
-
-# Syntax for broad cast join?
-# Join_cond = (
-# (col(“A”) == col(“B”)) & 
-# (col(“C”) == col(“D”)) &
-# )
-# New_df = df.alias(“LH”).join(broadcast(df1).alias(“RH”), Join_cond
-# , “left”)
 
