@@ -4,6 +4,11 @@ from pyspark.sql.functions import col
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC #Dataframe preparation
+
+# COMMAND ----------
+
 record_1 = [1,'A','arul','cricket']
 record_2 = [2,'A','sekar','chess']
 record_3 = [3,'A','kumar','tennis']
@@ -18,8 +23,6 @@ record_8 = [2,'B', 'lawyer']
 list = [record_1, record_2, record_3,record_4,record_5,record_6]
 list_2 = [record_6, record_7, record_8]
 
-# COMMAND ----------
-
 df_schema = StructType(fields=[StructField("sr_no", IntegerType(), False),
                                StructField("section", StringType(), False),
                                 StructField("name", StringType(), True),
@@ -31,8 +34,6 @@ df_2_schema = StructType(fields=[StructField("sr_no", IntegerType(), False),
                                 StructField("profession", StringType(), True),     
 ])
 
-# COMMAND ----------
-
 df = spark.createDataFrame(list, df_schema)
 df_2 = spark.createDataFrame(list_2, df_2_schema)
 
@@ -43,8 +44,59 @@ df_2.show()
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC #Join with Single condition
+
+# COMMAND ----------
+
 joined_df = df.alias('LH')\
                 .join(df_2.alias('RH'), (col('LH.sr_no') == col('RH.sr_no')) & (col('LH.section') == col('RH.section')) , 'inner')\
                 .select('LH.*','RH.profession')
 
 joined_df.show()
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC #Joining with Multiple condition
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC #Broadcast join
+
+# COMMAND ----------
+
+
+
+# Syntax for broad cast join?
+# Join_cond = (
+# (col(“A”) == col(“B”)) & 
+# (col(“C”) == col(“D”)) &
+# )
+# New_df = df.alias(“LH”).join(broadcast(df1).alias(“RH”), Join_cond
+# , “left”)
