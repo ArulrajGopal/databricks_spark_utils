@@ -8,8 +8,15 @@ from delta import DeltaTable
 # DBTITLE 1,establishing adls connectivity
 spark.conf.set(
     "fs.azure.account.key.arulrajstorageaccount.blob.core.windows.net",
-    "<account_key>"
+    "<account-key>"
 )
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC USE hive_metastore;
+# MAGIC CREATE DATABASE IF NOT EXISTS SCD_DEMO;
+# MAGIC USE DATABASE SCD_DEMO;
 
 # COMMAND ----------
 
@@ -17,7 +24,9 @@ spark.conf.set(
 schema = StructType([
     StructField("id", IntegerType(), True),
     StructField("name", StringType(), True),
-    StructField("emp_city", StringType(), True)
+    StructField("emp_city", StringType(), True),
+    StructField("salary", IntegerType(), True),
+    StructField("designation", StringType(), True)
 ])
 
 emp_full_df = spark.read\
@@ -28,8 +37,13 @@ emp_full_df = spark.read\
         .load("wasbs://private@arulrajstorageaccount.blob.core.windows.net/sample_employee/scd_implementations/emp_details.csv")
 
 
-emp_full_df.write.mode("overwrite").saveAsTable("emp_details")
+emp_full_df.write.mode("overwrite").saveAsTable("hive_metastore.scd_demo.emp_details")
 
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC select * from hive_metastore.scd_demo.emp_details
 
 # COMMAND ----------
 
@@ -37,7 +51,9 @@ emp_full_df.write.mode("overwrite").saveAsTable("emp_details")
 schema = StructType([
     StructField("id", IntegerType(), True),
     StructField("name", StringType(), True),
-    StructField("emp_city", StringType(), True)
+    StructField("emp_city", StringType(), True),
+    StructField("salary", IntegerType(), True),
+    StructField("designation", StringType(), True)
 ])
 
 emp_delta_df = spark.read\
@@ -48,23 +64,39 @@ emp_delta_df = spark.read\
         .load("wasbs://private@arulrajstorageaccount.blob.core.windows.net/sample_employee/scd_implementations/emp_details_delta.csv")
 
 
-dt = DeltaTable.forName(spark, "spark_catalog.default.emp_details")
+
+dt = DeltaTable.forName(spark, "hive_metastore.scd_demo.emp_details")
 
 dt.alias("tgt").merge(emp_delta_df.alias("src"), "tgt.id=src.id")\
                 .whenNotMatchedInsertAll()\
                 .whenMatchedUpdate(set = {
                     "name": "src.name",
-                    "emp_city": "src.emp_city"
+                    "emp_city": "src.emp_city",
+                    "salary": "src.salary",
+                    "designation": "src.designation"
                 })\
                 .execute()
 
+emp_full_df.write.format("delta").mode("overwrite").saveAsTable("default.emp_details")
+
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC select * from spark_catalog.default.emp_details
+# MAGIC select * from hive_metastore.scd_demo.emp_details
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC desc history spark_catalog.default.emp_details
+
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+
