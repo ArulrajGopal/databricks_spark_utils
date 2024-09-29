@@ -8,7 +8,7 @@ from delta import DeltaTable
 # DBTITLE 1,establishing adls connectivity
 spark.conf.set(
     "fs.azure.account.key.arulrajstorageaccount.blob.core.windows.net",
-    ""
+    "<account_key>"
 )
 
 # COMMAND ----------
