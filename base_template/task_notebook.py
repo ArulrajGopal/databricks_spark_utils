@@ -137,14 +137,3 @@ dt.alias("tgt")\
 # COMMAND ----------
 
 
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC #Percentage hike from previous salary
-# MAGIC
-# MAGIC
-# MAGIC
-# MAGIC
-# MAGIC
-# MAGIC
