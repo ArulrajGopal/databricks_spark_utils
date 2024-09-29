@@ -4,7 +4,9 @@
 
 # COMMAND ----------
 
-# MAGIC %run "./secrets"
+# DBTITLE 1,secrets
+storage_account_access_key= ""
+jdbcPassword = ""
 
 # COMMAND ----------
 

@@ -4,7 +4,8 @@
 
 # COMMAND ----------
 
-# MAGIC %run "./secrets"
+storage_account_access_key= ""
+jdbcPassword = ""
 
 # COMMAND ----------
 
@@ -141,9 +142,9 @@ dt.alias("tgt")\
 
 # MAGIC %md
 # MAGIC #Percentage hike from previous salary
-
-
-
-
-
-
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC
