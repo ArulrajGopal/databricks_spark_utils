@@ -65,6 +65,10 @@ status_active_applied_df.write.mode("overwrite").format("delta").saveAsTable("sp
 
 # COMMAND ----------
 
+
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC #Reading delta and data conversion
 

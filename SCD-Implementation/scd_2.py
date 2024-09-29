@@ -1,6 +1,7 @@
 # Databricks notebook source
 # DBTITLE 1,loading necessary libraries
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType
+from pyspark.sql.functions import lit, current_timestamp, col
 from delta import DeltaTable
 
 # COMMAND ----------
@@ -37,13 +38,13 @@ emp_full_df = spark.read\
         .load("wasbs://private@arulrajstorageaccount.blob.core.windows.net/sample_employee/scd_implementations/emp_details.csv")
 
 
-emp_full_df.write.mode("overwrite").saveAsTable("hive_metastore.scd_demo.emp_details")
 
+update_added_df = emp_full_df\
+                    .withColumn("isActive",lit("Y"))\
+                    .withColumn("updated_time",current_timestamp())
 
-# COMMAND ----------
+update_added_df.write.mode("overwrite").saveAsTable("hive_metastore.scd_demo.emp_details_scd_2")
 
-# MAGIC %sql
-# MAGIC select * from hive_metastore.scd_demo.emp_details
 
 # COMMAND ----------
 
@@ -65,38 +66,37 @@ emp_delta_df = spark.read\
 
 
 
-dt = DeltaTable.forName(spark, "hive_metastore.scd_demo.emp_details")
+# COMMAND ----------
 
-dt.alias("tgt").merge(emp_delta_df.alias("src"), "tgt.id=src.id")\
+emp_details_scd_2_df = spark.table("hive_metastore.scd_demo.emp_details_scd_2")
+
+new_key_added_df = emp_delta_df.withColumn("new_key",col("id"))
+
+joined_df = emp_details_scd_2_df.alias("LH").join(new_key_added_df.alias("RH"), col("LH.id")==col("RH.id"),"inner")\
+                    .select("RH.*")\
+                    .withColumn("new_key",lit(None))
+
+delta_df = new_key_added_df.union(joined_df)\
+                    .withColumn("isActive", lit("Y"))\
+                    .withColumn("updated_time",current_timestamp())
+
+dt = DeltaTable.forName(spark, "hive_metastore.scd_demo.emp_details_scd_2")
+
+dt.alias("tgt").merge(delta_df.alias("src"), "tgt.id=src.new_key")\
                 .whenNotMatchedInsertAll()\
                 .whenMatchedUpdate(set = {
-                    "name": "src.name",
-                    "emp_city": "src.emp_city",
-                    "salary": "src.salary",
-                    "designation": "src.designation"
+                    "updated_time": lit(current_timestamp()),
+                    "isActive":lit("N")
                 })\
                 .execute()
-
-emp_full_df.write.format("delta").mode("overwrite").saveAsTable("default.emp_details")
 
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC select * from hive_metastore.scd_demo.emp_details
+# MAGIC select * from hive_metastore.scd_demo.emp_details_scd_2
 
 # COMMAND ----------
 
-
-
-# COMMAND ----------
-
-
-
-# COMMAND ----------
-
-
-
-# COMMAND ----------
-
-
+# MAGIC %sql
+# MAGIC select * from hive_metastore.scd_demo.emp_details_scd_2 where isActive = "Y"
