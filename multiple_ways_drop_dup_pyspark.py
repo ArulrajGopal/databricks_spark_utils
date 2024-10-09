@@ -23,7 +23,7 @@ df = spark.createDataFrame(list, df_schema)
 #Note: - the below methods not documented properly
 #df.distinct()
 #df.groupby()
-#windowspec
+#windowspec & using rownumber
 #dropduplicates()
-#rdd.distinct()
+
 
