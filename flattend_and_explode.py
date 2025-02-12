@@ -1,31 +1,37 @@
-from pyspark.sql import SparkSession
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType, ArrayType
+from pyspark.sql.functions import col, explode
+from pyspark.sql.types import StructType, ArrayType
 
-# Create Spark Session
-spark = SparkSession.builder.getOrCreate()
+def flatten_and_explode(df):
+    """
+    Recursively flattens all struct fields and explodes arrays.
+    
+    Args:
+    df (DataFrame): Input Spark DataFrame
+    
+    Returns:
+    DataFrame: Fully flattened and exploded DataFrame
+    """
+    while True:
+        flat_cols = []
+        has_nested = False  # Flag to check if there are more nested fields
 
-# Sample Data with Multi-Level Nested Structs and Arrays
-data = [
-    (1, ("Alice", "Engineer", ("New York", "NY")), ["Python", "Spark"]),
-    (2, ("Bob", "Manager", ("San Francisco", "CA")), ["Java", "Scala"])
-]
-
-schema = StructType([
-    StructField("id", IntegerType(), True),
-    StructField("person", StructType([
-        StructField("name", StringType(), True),
-        StructField("job", StringType(), True),
-        StructField("address", StructType([
-            StructField("city", StringType(), True),
-            StructField("state", StringType(), True)
-        ]))
-    ])),
-    StructField("skills", ArrayType(StringType()), True)
-])
-
-df = spark.createDataFrame(data, schema)
-df.show(truncate=False)
-
-# Apply Multi-Level Flattening and Exploding
-df_flat = flatten_and_explode(df)
-df_flat.show(truncate=False)
+        for field in df.schema.fields:
+            field_name = field.name
+            
+            if isinstance(field.dataType, StructType):  # If Struct, flatten it
+                has_nested = True
+                for sub_field in field.dataType.fields:
+                    flat_cols.append(col(f"{field_name}.{sub_field.name}").alias(f"{field_name}_{sub_field.name}"))
+            elif isinstance(field.dataType, ArrayType):  # If Array, explode it
+                has_nested = True
+                df = df.withColumn(field_name, explode(col(field_name)))
+                flat_cols.append(col(field_name))
+            else:
+                flat_cols.append(col(field_name))
+        
+        df = df.select(*flat_cols)  # Apply flattening
+        
+        if not has_nested:  # Stop if no more nested fields
+            break
+    
+    return df
