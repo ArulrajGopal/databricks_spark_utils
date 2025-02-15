@@ -1,4 +1,4 @@
-from pyspark.sql.functions import col
+from pyspark.sql.functions import col,explode_outer
 from pyspark.sql.types import StructType
 
 def flatten_schema(df, prefix=""):
