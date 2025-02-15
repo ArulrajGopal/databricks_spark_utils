@@ -2,16 +2,6 @@ from pyspark.sql.functions import col
 from pyspark.sql.types import StructType
 
 def flatten_schema(df, prefix=""):
-    """
-    Recursively flattens all levels of struct columns in a DataFrame.
-    
-    Args:
-    df (DataFrame): Input Spark DataFrame
-    prefix (str): Prefix for column names during flattening
-    
-    Returns:
-    DataFrame: Flattened DataFrame
-    """
     flat_cols = []
     
     for field in df.schema.fields:
@@ -26,16 +16,12 @@ def flatten_schema(df, prefix=""):
     return df.select(*flat_cols)
 
 def recursive_flatten(df):
-    """
-    Recursively applies flattening until no struct fields remain.
-    
-    Args:
-    df (DataFrame): Input Spark DataFrame
-    
-    Returns:
-    DataFrame: Fully flattened DataFrame
-    """
     while any(isinstance(field.dataType, StructType) for field in df.schema.fields):
         df = flatten_schema(df)
     
     return df
+
+def explode_array(df,column_name):
+    return df.withColumn(column_name, explode_outer(df[column_name]))
+
+
