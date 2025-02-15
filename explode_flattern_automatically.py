@@ -15,6 +15,7 @@ def flatten_schema(df, prefix=""):
     
     return df.select(*flat_cols)
 
+
 def recursive_flatten(df):
     while any(isinstance(field.dataType, StructType) for field in df.schema.fields):
         df = flatten_schema(df)
@@ -23,5 +24,47 @@ def recursive_flatten(df):
 
 def explode_array(df,column_name):
     return df.withColumn(column_name, explode_outer(df[column_name]))
+
+
+
+def explode_all_cols(source_df):
+    processing_df = source_df
+
+    for colm in source_df.schema.fields:
+        if isintance(colm.dataType, ArrayType):
+            processing_df = explode_array(processing_df, colm.name)
+
+    return processing_df
+
+
+def flattern_and_explode(source_df):
+    processing_df = source_df
+    struct_array_present = True
+    while True:
+        if struct_array_present == False:
+            break
+
+        processing_df = recursive_flatten(processing_df)
+        processing_df = explode_all_cols(processing_df)
+
+
+        struct_array_count = 0
+        for i in processing_df.schema.fields:
+            if isinstance(i.dataType, StructType) or isinstance(i.dataType, ArrayType):
+                struct_array_count += 1
+
+        if struct_array_present == 0:
+            struct_array_present = False
+
+
+    return processing_df
+
+            
+
+
+
+
+
+
 
 
