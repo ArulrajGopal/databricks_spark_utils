@@ -49,13 +49,13 @@ def flattern_and_explode(source_df):
         processing_df = recursive_flatten(processing_df)
         processing_df = explode_all_cols(processing_df)
 
-        struct_array_count = 0
         for i in processing_df.schema.fields:
             if isinstance(i.dataType, StructType) or isinstance(i.dataType, ArrayType):
-                struct_array_count += 1
-        if struct_array_present == 0:
-            struct_array_present = False
-
+                struct_array_present = True
+                break
+            else:
+                struct_array_present = False
+                
     return processing_df
 
             
