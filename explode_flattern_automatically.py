@@ -33,7 +33,7 @@ def explode_all_cols(source_df):
     processing_df = source_df
 
     for colm in source_df.schema.fields:
-        if isintance(colm.dataType, ArrayType):
+        if isinstance(colm.dataType, ArrayType):
             processing_df = explode_array(processing_df, colm.name)
 
     return processing_df
