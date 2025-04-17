@@ -2,7 +2,7 @@ import requests
 
 # Replace these with your values
 DATABRICKS_INSTANCE = 'https://adb-1385886232364444.4.azuredatabricks.net' 
-TOKEN = ""
+TOKEN = "paste_your_token_here"  # Replace with your Databricks token
 
 
 
@@ -33,3 +33,15 @@ while True:
 
 
 print(job_ids)
+
+# Get job details for each job ID
+list_job_details = []
+
+for job_id in job_ids:
+    # Set up the endpoint
+    url = f"{DATABRICKS_INSTANCE}/api/2.1/jobs/get?job_id={job_id}"
+
+    response = requests.get(url, headers=headers).json()
+    list_job_details.append(response)
+
+print(list_job_details)
