@@ -188,19 +188,21 @@ dbutils.library.restartPython()
 
 from agent import AGENT
 
-AGENT.predict({"messages": [{"role": "user", "content": "Hello!"}]})
+# COMMAND ----------
+
+AGENT.predict({"messages": [{"role": "user", "content": "Tell me about India in 2 lines!"}]})
 
 # COMMAND ----------
 
 for event in AGENT.predict_stream(
-    {"messages": [{"role": "user", "content": "what is the salary of name12"}]}
+    {"messages": [{"role": "user", "content": "what is the salary of name_12. in case if you found permission error tell me what to do fix the error."}]}
 ):
     print(event, "-----------\n")
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### Log the `agent` as an MLflow model
+# MAGIC ## Log the `agent` as an MLflow model
 # MAGIC Determine Databricks resources to specify for automatic auth passthrough at deployment time
 # MAGIC - **TODO**: If your Unity Catalog tool queries a [vector search index](https://learn.microsoft.com/azure/databricks/generative-ai/agent-framework/unstructured-retrieval-tools) or leverages [external functions](https://learn.microsoft.com/azure/databricks/generative-ai/agent-framework/external-connection-tools), you need to include the dependent vector search index and UC connection objects, respectively, as resources. See [docs](https://learn.microsoft.com/azure/databricks/generative-ai/agent-framework/log-agent#specify-resources-for-automatic-authentication-passthrough) for more details.
 # MAGIC
