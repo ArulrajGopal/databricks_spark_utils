@@ -29,45 +29,18 @@ mlflow.langchain.autolog()
 client = DatabricksFunctionClient()
 set_uc_function_client(client)
 
-############################################
-# Define your LLM endpoint and system prompt
-############################################
-LLM_ENDPOINT_NAME = "databricks-claude-sonnet-4"
+
+LLM_ENDPOINT_NAME = "databricks-meta-llama-3-3-70b-instruct"
 llm = ChatDatabricks(endpoint=LLM_ENDPOINT_NAME)
 
 system_prompt = """"""
 
-###############################################################################
-## Define tools for your agent, enabling it to retrieve data or take actions
-## beyond text generation
-## To create and see usage examples of more tools, see
-## https://learn.microsoft.com/azure/databricks/generative-ai/agent-framework/agent-tool
-###############################################################################
 tools = []
 
-# You can use UDFs in Unity Catalog as agent tools
+
 uc_tool_names = ["sample_catalog.sample_database.get_salary"]
 uc_toolkit = UCFunctionToolkit(function_names=uc_tool_names)
 tools.extend(uc_toolkit.tools)
-
-
-# # (Optional) Use Databricks vector search indexes as tools
-# # See https://learn.microsoft.com/azure/databricks/generative-ai/agent-framework/unstructured-retrieval-tools
-# # for details
-#
-# # TODO: Add vector search indexes as tools or delete this block
-# vector_search_tools = [
-#         VectorSearchRetrieverTool(
-#         index_name="",
-#         # filters="..."
-#     )
-# ]
-# tools.extend(vector_search_tools)
-
-
-#####################
-## Define agent logic
-#####################
 
 
 def create_tool_calling_agent(
