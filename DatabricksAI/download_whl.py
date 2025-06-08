@@ -7,7 +7,7 @@ package_lst = [
     ,"langchain==0.3.25"
     ,"langgraph==0.3.4"
     ,"databricks-agents==0.22.1"
-    ,"databricks-langchain=0.5.1"
+    ,"databricks-langchain==0.5.1"
     ,"pydantic==2.11.5"
     ,"unitycatalog-langchain==0.2.0"
     ]
